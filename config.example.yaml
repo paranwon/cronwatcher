@@ -1,0 +1,35 @@
+# cronwatcher configuration example
+# Copy to config.yaml and adjust to your environment.
+
+# Logging level: debug | info | warn | error
+log_level: info
+
+# Optional: path to write log output (leave empty for stdout)
+log_file: "/var/log/cronwatcher.log"
+
+# Alerting configuration
+alerts:
+  # HTTP POST webhook called on alert events (optional)
+  webhook_url: "https://hooks.example.com/cronwatcher"
+  # Email address for alert notifications (optional, requires SMTP setup)
+  email: "ops@example.com"
+
+# List of cron jobs to monitor
+jobs:
+  - name: nightly-backup
+    # Standard cron expression (5-field) or shorthand (@daily, @hourly, etc.)
+    schedule: "0 2 * * *"
+    # Alert if the job runs longer than this duration
+    max_duration: 30m
+    # How long after the scheduled time to wait before raising a missed-job alert
+    grace_period: 5m
+
+  - name: cache-warmup
+    schedule: "*/15 * * * *"
+    max_duration: 2m
+    grace_period: 1m
+
+  - name: log-rotation
+    schedule: "@daily"
+    max_duration: 10m
+    grace_period: 3m
