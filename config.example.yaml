@@ -13,6 +13,8 @@ alerts:
   webhook_url: "https://hooks.example.com/cronwatcher"
   # Email address for alert notifications (optional, requires SMTP setup)
   email: "ops@example.com"
+  # Number of consecutive failures before an alert is sent (default: 1)
+  failure_threshold: 1
 
 # List of cron jobs to monitor
 jobs:
@@ -23,6 +25,8 @@ jobs:
     max_duration: 30m
     # How long after the scheduled time to wait before raising a missed-job alert
     grace_period: 5m
+    # Optional: silence alerts for this job (useful during maintenance windows)
+    # silenced: true
 
   - name: cache-warmup
     schedule: "*/15 * * * *"
