@@ -1,54 +1,43 @@
-package alert
+package alert_test
 
 import (
 	"bytes"
-	"log/slog"
+	"log"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/user/cronwatcher/internal/config"
+	"github.com/yourorg/cronwatcher/internal/alert"
 )
 
-func newTestLogger(buf *bytes.Buffer) *slog.Logger {
-	h := slog.NewTextHandler(buf, &slog.HandlerOptions{Level: slog.LevelDebug})
-	return slog.New(h)
+func newTestLogger(buf *bytes.Buffer) *alert.Logger {
+	l := log.New(buf, "", 0)
+	return alert.NewLogger(l)
 }
 
 func TestLogger_MissedJob(t *testing.T) {
 	var buf bytes.Buffer
-	l := NewLogger(newTestLogger(&buf))
+	logger := newTestLogger(&buf)
 
-	job := config.Job{
-		Name:     "cleanup",
-		MaxDelay: 5 * time.Minute,
-	}
-	l.MissedJob(job, time.Now().Add(-10*time.Minute))
+	logger.MissedJob("cleanup")
 
-	out := buf.String()
-	if !strings.Contains(out, "missed job") {
-		t.Errorf("expected 'missed job' in output, got: %s", out)
+	if !strings.Contains(buf.String(), "cleanup") {
+		t.Errorf("expected log output to mention job name, got: %s", buf.String())
 	}
-	if !strings.Contains(out, "cleanup") {
-		t.Errorf("expected job name in output, got: %s", out)
+	if !strings.Contains(strings.ToLower(buf.String()), "missed") {
+		t.Errorf("expected log output to mention 'missed', got: %s", buf.String())
 	}
 }
 
 func TestLogger_LongRunningJob(t *testing.T) {
 	var buf bytes.Buffer
-	l := NewLogger(newTestLogger(&buf))
+	logger := newTestLogger(&buf)
 
-	job := config.Job{
-		Name:        "report",
-		MaxDuration: 10 * time.Minute,
-	}
-	l.LongRunningJob(job, 15*time.Minute)
+	logger.LongRunning("report", 95.3)
 
-	out := buf.String()
-	if !strings.Contains(out, "long-running job") {
-		t.Errorf("expected 'long-running job' in output, got: %s", out)
+	if !strings.Contains(buf.String(), "report") {
+		t.Errorf("expected log output to mention job name, got: %s", buf.String())
 	}
-	if !strings.Contains(out, "report") {
-		t.Errorf("expected job name in output, got: %s", out)
+	if !strings.Contains(buf.String(), "95.3") {
+		t.Errorf("expected log output to include duration, got: %s", buf.String())
 	}
 }
