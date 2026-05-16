@@ -52,6 +52,13 @@ func TestClearCheckpoints_RemovesEntries(t *testing.T) {
 	}
 }
 
+func TestClearCheckpoints_UnknownJob_ReturnsError(t *testing.T) {
+	w := NewForTest(testConfig())
+	if err := w.ClearCheckpoints("nonexistent"); err == nil {
+		t.Fatal("expected error for unknown job")
+	}
+}
+
 func TestRecordCheckpoint_StoresMeta(t *testing.T) {
 	w := NewForTest(testConfig())
 	meta := map[string]string{"files": "42"}
