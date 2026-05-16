@@ -57,3 +57,16 @@ func (w *Watcher) GetStreak(name string) (StreakEntry, bool) {
 	}
 	return *e, true
 }
+
+// ResetStreak resets both the success and failure streaks for the named job.
+func (w *Watcher) ResetStreak(name string) error {
+	w.streaks.mu.Lock()
+	defer w.streaks.mu.Unlock()
+	e, ok := w.streaks.streaks[name]
+	if !ok {
+		return ErrUnknownJob
+	}
+	e.SuccessStreak = 0
+	e.FailureStreak = 0
+	return nil
+}
